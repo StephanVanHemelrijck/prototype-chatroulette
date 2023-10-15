@@ -19,10 +19,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} w-screen h-auto bg-zinc-800`}>
+      <body
+        className={`${inter.className} w-screen bg-stone-200 text-stone-900`}
+      >
         <SocketContextProvider>
           <Header />
-          {children}
+          <main style={{ height: "calc(100vh - 76px)" }}>{children}</main>
         </SocketContextProvider>
       </body>
     </html>

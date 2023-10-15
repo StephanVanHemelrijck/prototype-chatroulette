@@ -19,9 +19,9 @@ const Header = () => {
   }, [socket]);
 
   return (
-    <header className="bg-zinc-900 p-4 text-cyan-600 flex justify-between items-center">
+    <header className="bg-stone-200 p-4 text-emerald-500 flex justify-between items-center">
       <h1 className="text-3xl font-bold mb-2">SueCam</h1>
-      <p className="text-sm">Users Online: {usersOnline}</p>
+      <p className="text-sm font-medium">Users Online: {usersOnline}</p>
     </header>
   );
 };
