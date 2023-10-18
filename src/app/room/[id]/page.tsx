@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useSocketContext } from "../../context/store";
+import MediaStreamDisplay from "@/app/components/Header/MediaStreamDisplay";
 
 interface RoomProps {
   params: {
@@ -10,7 +11,7 @@ interface RoomProps {
 
 const Room = ({ params }: RoomProps) => {
   const [users, setUsers] = useState([]);
-  const { socket } = useSocketContext();
+  const { socket }: any = useSocketContext();
 
   useEffect(() => {
     if (!socket) return;
@@ -29,15 +30,17 @@ const Room = ({ params }: RoomProps) => {
 
     return () => {
       socket?.off("room");
+      socket?.off("user-left");
     };
-  }, [socket]);
+  }, [socket, params.id]);
 
   return (
     <>
       <div>Room with ID : {params.id}</div>
       {users.map((user: any) => (
-        <div key={user.id}>{user.username}</div>
+        <div key={user.userId}>{user.username}</div>
       ))}
+      <MediaStreamDisplay roomId={params.id} />
     </>
   );
 };

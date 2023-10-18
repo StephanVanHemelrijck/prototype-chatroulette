@@ -14,13 +14,13 @@ const Page = () => {
     const username = e.currentTarget.username.value;
     setUsername(username);
 
-    socket?.emit("start-call", username);
+    socket?.emit("room-join", username);
   };
 
   useEffect(() => {
     if (!socket) return;
 
-    socket?.on("started-call", (data: { roomId: any }) => {
+    socket?.on("room-joined", (data: { roomId: any }) => {
       console.log(data);
       router.push(`/room/${data.roomId}`);
     });
