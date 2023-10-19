@@ -13,6 +13,8 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
   const userStreamRef = useRef<MediaStream | null>(null);
   const hostRef = useRef<boolean>(false);
   const router = useRouter();
+  const tempVideoRef = useRef<HTMLVideoElement>(null);
+  const [tempVideoRefActive, setTempVideoRefActive] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -72,6 +74,24 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
       socket.off("room-leave");
     };
   }, [socket, roomId]);
+
+  // Initiate Web RTC
+  useEffect(() => {
+    // TEMP WEB RTC SETUP
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        userStreamRef.current = stream;
+        tempVideoRef.current!.srcObject = stream;
+        tempVideoRef.current!.onloadedmetadata = () => {
+          tempVideoRef.current!.play();
+          setTempVideoRefActive(true);
+        };
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   const handleRoomCreated = () => {
     navigator.mediaDevices
@@ -172,10 +192,12 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
     // We implement our onTrack method for when we receive tracks
     connection.ontrack = handleTrackEvent;
 
-    // Set loading to false when peer connects
+    // Set loading to false when peer connects and delete tempVideoRef
     connection.onconnectionstatechange = () => {
       if (connection.connectionState === "connected") {
         setLoading(false);
+        tempVideoRef.current?.remove();
+        setTempVideoRefActive(false);
       }
     };
 
@@ -251,7 +273,26 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div className="relative aspect-w-16 aspect-h-9">
+      <div
+        className="relative aspect-w-16 aspect-h-9"
+        style={{ display: tempVideoRefActive ? "block" : "none" }}
+      >
+        <video
+          className="w-full h-full object-cover"
+          autoPlay
+          playsInline
+          muted
+          controls={false}
+          ref={tempVideoRef}
+        />
+        <div className="absolute top-0 flex justify-center items-center w-full h-full opacity-75 text-emerald-300">
+          {username}
+        </div>
+      </div>
+      <div
+        className="relative aspect-w-16 aspect-h-9 "
+        style={{ display: tempVideoRefActive ? "none" : "block" }}
+      >
         <video
           className="w-full h-full object-cover"
           autoPlay
