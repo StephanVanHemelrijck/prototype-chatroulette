@@ -14,6 +14,8 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
   const hostRef = useRef<boolean>(false);
   const router = useRouter();
 
+  const [loading, setLoading] = useState<boolean>(true);
+
   // Get room data
   useEffect(() => {
     if (!socket) return;
@@ -51,6 +53,8 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
 
     socket.on("room-left", () => {
       onPeerLeave();
+      // Set loading to true when peer disconnects
+      setLoading(true);
     });
 
     // Events that are webRTC speccific
@@ -167,6 +171,14 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
 
     // We implement our onTrack method for when we receive tracks
     connection.ontrack = handleTrackEvent;
+
+    // Set loading to false when peer connects
+    connection.onconnectionstatechange = () => {
+      if (connection.connectionState === "connected") {
+        setLoading(false);
+      }
+    };
+
     return connection;
   };
 
@@ -259,6 +271,18 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
           playsInline
           ref={peerVideoRef}
         />
+        {loading && (
+          <div className="w-full h-full absolute top-0 z-10 bg-black text-emerald-500 flex justify-center items-center ">
+            <div
+              className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] text-emerald-500 motion-reduce:animate-[spin_1.5s_linear_infinite]"
+              role="status"
+            >
+              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                Loading...
+              </span>
+            </div>
+          </div>
+        )}
       </div>
       <button onClick={leaveRoom}>Leave</button>
     </div>
