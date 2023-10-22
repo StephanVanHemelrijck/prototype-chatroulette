@@ -6,6 +6,7 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const { socket, username }: { socket: any; username: string } =
     useSocketContext();
+  const [guestUser, setGuestUser] = useState<any>(null);
   const [room, setRoom] = useState<any>(null);
   const rtcConnectionRef = useRef<any>();
   const userVideoRef = useRef<HTMLVideoElement>(null);
@@ -26,6 +27,7 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
     // Get room data
     socket.on("room", (room: any) => {
       setRoom(room);
+
       // If room is full -> prepare room
       if (room.users.length === room.limit) {
         socket.emit("room-prepare", room);
@@ -33,7 +35,12 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
     });
 
     socket.on("room-prepared", (room: any) => {
-      console.log(room);
+      // Set guest user (the user where username != username of instance)
+      const guestUser = room.users.find(
+        (user: any) => user.username !== username
+      );
+      setGuestUser(guestUser);
+
       // If user is host -> handleroomcreated
       const host = room.users.find((user: any) => user.role === "host");
       if (host.username === username) {
@@ -272,46 +279,49 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4 p-3">
       <div
-        className="relative aspect-w-16 aspect-h-9"
+        className="relative aspect-w-16 aspect-h-9 min-w-[20rem] max-w-md sm:max-w-lg md:max-w-xl lg:max-w-full "
         style={{ display: tempVideoRefActive ? "block" : "none" }}
       >
         <video
-          className="w-full h-full object-cover"
+          className="w-full h-full "
           autoPlay
           playsInline
           muted
           controls={false}
           ref={tempVideoRef}
         />
-        <div className="absolute top-0 flex justify-center items-center w-full h-full opacity-75 text-emerald-300">
+        <div className="absolute bottom-[20px] left-[20px] bg-stone-200 text-stone-900 py-1 px-2 rounded-md text-sm">
           {username}
         </div>
       </div>
       <div
-        className="relative aspect-w-16 aspect-h-9 "
+        className="relative aspect-w-16 aspect-h-9 min-w-[20rem] max-w-md sm:max-w-lg md:max-w-xl lg:max-w-full "
         style={{ display: tempVideoRefActive ? "none" : "block" }}
       >
         <video
-          className="w-full h-full object-cover"
+          className="w-full h-full "
           autoPlay
           playsInline
           muted
           controls={false}
           ref={userVideoRef}
         />
-        <div className="absolute top-0 flex justify-center items-center w-full h-full opacity-75 text-emerald-300">
+        <div className="absolute bottom-[20px] left-[20px] bg-stone-200 text-stone-900 py-1 px-2 rounded-md text-sm">
           {username}
         </div>
       </div>
-      <div className="relative aspect-w-16 aspect-h-9">
+      <div className="relative aspect-w-16 aspect-h-9 min-w-[20rem] max-w-md sm:max-w-lg md:max-w-xl lg:max-w-full ">
         <video
-          className="w-full h-full object-cover"
+          className="w-full h-full "
           autoPlay
           playsInline
           ref={peerVideoRef}
         />
+        <div className="absolute bottom-[20px] left-[20px] bg-stone-200 text-stone-900 py-1 px-2 rounded-md text-sm">
+          {guestUser?.username}
+        </div>
         {loading && (
           <div className="w-full h-full absolute top-0 z-10 bg-black text-emerald-500 flex justify-center items-center ">
             <div
@@ -325,7 +335,12 @@ const MediaStreamDisplay = ({ roomId }: { roomId: String }) => {
           </div>
         )}
       </div>
-      <button onClick={leaveRoom}>Leave</button>
+      <button
+        onClick={leaveRoom}
+        className="border border-emerald-400 hover:bg-emerald-400 p-2 w-1/3 text-stone-900 rounded-md"
+      >
+        Leave
+      </button>
     </div>
   );
 };

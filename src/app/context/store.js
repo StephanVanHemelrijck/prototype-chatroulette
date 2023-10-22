@@ -17,6 +17,7 @@ export const SocketContextProvider = ({ children }) => {
 
   useEffect(() => {
     // Initialize socket
+    // prod url: https://prototype-chatroulette-socket.onrender.com
     const newSocket = io("http://localhost:5000");
     setSocket(newSocket);
 

@@ -19,8 +19,6 @@ const Room = ({ params }: RoomProps) => {
     socket?.emit("get-room", params.id);
 
     socket?.on("room", (room: any) => {
-      console.log(room);
-
       setUsers(room.users);
     });
 
@@ -36,10 +34,6 @@ const Room = ({ params }: RoomProps) => {
 
   return (
     <>
-      <div>Room with ID : {params.id}</div>
-      {users.map((user: any) => (
-        <div key={user.userId}>{user.username}</div>
-      ))}
       <MediaStreamDisplay roomId={params.id} />
     </>
   );
